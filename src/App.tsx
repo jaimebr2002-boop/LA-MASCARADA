@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, Utensils, Wine, Quote, Star, MapPin, Phone, Mail, Instagram, Facebook, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
+import { motion, useScroll, useTransform } from 'motion/react';
+import { useRef } from 'react';
 
 const REVIEWS = [
   { name: "Lorena D.C", text: "Súper recomendado, atención amable, berberechos de Galicia increíbles." },
@@ -24,6 +26,24 @@ export default function App() {
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(3);
 
+  const { scrollY } = useScroll();
+  const heroY = useTransform(scrollY, [0, 1000], [0, 400]);
+  const heroOpacity = useTransform(scrollY, [0, 600], [1, 0]);
+
+  const aboutRef = useRef<HTMLElement>(null);
+  const { scrollYProgress: aboutScrollYProgress } = useScroll({
+    target: aboutRef,
+    offset: ["start end", "end start"]
+  });
+  const aboutImageY = useTransform(aboutScrollYProgress, [0, 1], [50, -50]);
+
+  const reservaRef = useRef<HTMLElement>(null);
+  const { scrollYProgress: reservaScrollYProgress } = useScroll({
+    target: reservaRef,
+    offset: ["start end", "end start"]
+  });
+  const reservaY = useTransform(reservaScrollYProgress, [0, 1], [50, -50]);
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) setItemsPerView(1);
@@ -47,7 +67,7 @@ export default function App() {
     <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden bg-background-light text-black">
       {/* Header */}
       <header className="fixed top-0 z-50 flex w-full items-center justify-between border-b border-primary/10 bg-background-light/90 px-6 py-4 backdrop-blur-md md:px-20">
-        <div className="flex items-center gap-4 text-primary">
+        <a href="#inicio" className="flex items-center gap-4 text-primary transition-opacity hover:opacity-80">
           <img
             alt="La Mascarada Logo"
             className="size-10 rounded-full object-cover"
@@ -56,7 +76,7 @@ export default function App() {
           <h2 className="font-display text-xl font-bold leading-tight tracking-tight text-primary">
             La Mascarada
           </h2>
-        </div>
+        </a>
         <div className="hidden flex-1 items-center justify-end gap-8 lg:flex">
           <nav className="flex items-center gap-9">
             <a href="#inicio" className="text-sm font-medium text-black transition-colors hover:text-primary">Inicio</a>
@@ -92,15 +112,24 @@ export default function App() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section id="inicio" className="relative h-screen w-full">
-          <div
+        <section id="inicio" className="relative h-screen w-full overflow-hidden">
+          <motion.div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{
-              backgroundImage: 'linear-gradient(rgba(31, 19, 19, 0.6) 0%, rgba(31, 19, 19, 0.8) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuBv_Nw1HivLxpOcxgmt8UyoI6XEeiRl_l2TuSymeYCUcCJh1Jp9-iXKlIiplxPdJJsLW3pnvWELiP12Hy94UFM2G0jUV5-mMEetm0j5egzn3GPRb9PbY4SfEaP-_I_H38kAl4bgJSkMqT1aqL6k8y5zgEaoCah0OALpI5QIAnm_uwR7oOckxKCisrpebMEOO9cswRApFS-fag0Eub7RJ5-t6eLDypOggRSiEKSvxFdbjZnzPX58Wdy_mpECdA503c0kYm-MFzeIVqE")'
+              backgroundImage: 'linear-gradient(rgba(31, 19, 19, 0.6) 0%, rgba(31, 19, 19, 0.8) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuBv_Nw1HivLxpOcxgmt8UyoI6XEeiRl_l2TuSymeYCUcCJh1Jp9-iXKlIiplxPdJJsLW3pnvWELiP12Hy94UFM2G0jUV5-mMEetm0j5egzn3GPRb9PbY4SfEaP-_I_H38kAl4bgJSkMqT1aqL6k8y5zgEaoCah0OALpI5QIAnm_uwR7oOckxKCisrpebMEOO9cswRApFS-fag0Eub7RJ5-t6eLDypOggRSiEKSvxFdbjZnzPX58Wdy_mpECdA503c0kYm-MFzeIVqE")',
+              y: heroY,
             }}
           />
-          <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 pt-20 text-center md:px-20">
-            <div className="flex max-w-3xl flex-col items-center gap-6">
+          <motion.div 
+            className="relative z-10 flex h-full flex-col items-center justify-center px-4 pt-20 text-center md:px-20"
+            style={{ opacity: heroOpacity }}
+          >
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="flex max-w-3xl flex-col items-center gap-6"
+            >
               <img
                 alt="Logo Hero"
                 className="mx-auto mb-2 h-32 w-32 rounded-full object-cover shadow-lg"
@@ -122,13 +151,19 @@ export default function App() {
                   Reserva
                 </a>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </section>
 
         {/* Sobre Nosotros */}
-        <section id="sobre-nosotros" className="px-6 py-20 md:px-20">
-          <div className="mx-auto flex max-w-6xl flex-col items-center gap-12 md:flex-row">
+        <section id="sobre-nosotros" ref={aboutRef} className="px-6 py-20 md:px-20">
+          <motion.div 
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="mx-auto flex max-w-6xl flex-col items-center gap-12 md:flex-row"
+          >
             <div className="flex flex-1 flex-col gap-6">
               <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-primary">Nuestra Esencia</h2>
               <h3 className="font-display text-4xl font-bold leading-tight text-black md:text-5xl">
@@ -154,21 +189,34 @@ export default function App() {
                 </div>
               </div>
             </div>
-            <div className="relative flex-1">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="relative flex-1"
+              style={{ y: aboutImageY }}
+            >
               <div className="rotate-2 overflow-hidden rounded-2xl shadow-2xl">
                 <img
                   alt="Terraza y ambiente"
-                  className="h-[500px] w-full object-cover"
+                  className="h-[500px] w-full object-cover transition-transform duration-700 hover:scale-110"
                   src="https://res.cloudinary.com/dfbsqy5ul/image/upload/v1773087192/unnamed_qgt3lu.webp"
                 />
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </section>
 
         {/* La Carta */}
         <section id="la-carta" className="px-6 py-20 md:px-20">
-          <div className="mx-auto max-w-6xl">
+          <motion.div 
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="mx-auto max-w-6xl"
+          >
             <div className="mb-16 text-center">
               <h2 className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-primary">La Carta</h2>
               <h3 className="font-display text-4xl font-bold text-black">Nuestras Especialidades</h3>
@@ -185,7 +233,13 @@ export default function App() {
 
             <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-3">
               {/* Columna 1 */}
-              <div className="flex flex-col gap-12">
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="flex flex-col gap-12"
+              >
                 <div>
                   <h4 className="mb-6 font-display text-2xl font-bold text-primary border-b border-primary/20 pb-2">Entrantes</h4>
                   <ul className="flex flex-col gap-4">
@@ -215,10 +269,16 @@ export default function App() {
                     <li className="flex justify-between gap-4"><span className="font-bold text-slate-900">Tortilla de bacalao estilo sidrería asturiana</span><span className="text-primary font-bold">18,00€</span></li>
                   </ul>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Columna 2 */}
-              <div className="flex flex-col gap-12">
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="flex flex-col gap-12"
+              >
                 <div>
                   <h4 className="mb-6 font-display text-2xl font-bold text-primary border-b border-primary/20 pb-2">Platos del Chef</h4>
                   <ul className="flex flex-col gap-4">
@@ -258,10 +318,16 @@ export default function App() {
                     </li>
                   </ul>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Columna 3 */}
-              <div className="flex flex-col gap-12">
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="flex flex-col gap-12"
+              >
                 <div>
                   <h4 className="mb-6 font-display text-2xl font-bold text-primary border-b border-primary/20 pb-2">Carnes a la Parrilla</h4>
                   <ul className="flex flex-col gap-4">
@@ -293,14 +359,20 @@ export default function App() {
                   </ul>
                   <p className="mt-4 text-sm italic text-slate-500">* Consulta disponibilidad y precios de nuestras sugerencias.</p>
                 </div>
-              </div>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* Reseñas */}
         <section id="resenas" className="px-6 py-20 md:px-20">
-          <div className="mx-auto max-w-6xl">
+          <motion.div 
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="mx-auto max-w-6xl"
+          >
             <div className="mb-12 flex flex-col items-center">
               <Quote className="mb-4 h-12 w-12 text-primary" />
               <h3 className="text-center font-display text-3xl font-bold text-black">Lo que dicen nuestros comensales</h3>
@@ -377,12 +449,18 @@ export default function App() {
                 <ExternalLink className="ml-2 h-4 w-4" />
               </a>
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* Visítanos */}
         <section id="visitanos" className="px-6 py-20 md:px-20">
-          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 lg:grid-cols-2">
+          <motion.div 
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="mx-auto grid max-w-6xl grid-cols-1 gap-12 lg:grid-cols-2"
+          >
             <div className="flex flex-col gap-8">
               <div>
                 <h2 className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-primary">Ubicación y Horario</h2>
@@ -430,19 +508,26 @@ export default function App() {
                 title="Mapa de ubicación de La Mascarada"
               ></iframe>
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* Reservar CTA */}
-        <section id="reserva" className="px-6 py-20 md:px-20">
-          <div className="mx-auto max-w-4xl rounded-3xl border border-primary/5 bg-white/50 p-10 text-center shadow-2xl backdrop-blur-sm md:p-16">
+        <section id="reserva" ref={reservaRef} className="px-6 py-20 md:px-20">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            style={{ y: reservaY }}
+            className="mx-auto max-w-4xl rounded-3xl border border-primary/5 bg-white/50 p-10 text-center shadow-2xl backdrop-blur-sm md:p-16"
+          >
             <h3 className="mb-4 font-display text-4xl font-bold text-black">Reserva tu Mesa</h3>
             <p className="mb-8 text-lg text-black">Para garantizar la mejor atención, gestionamos todas nuestras reservas de forma personalizada mediante llamada telefónica.</p>
             <a href="tel:630237124" className="mx-auto flex h-16 w-full max-w-md items-center justify-center gap-3 rounded-xl bg-primary px-8 text-xl font-bold text-white shadow-lg transition-transform hover:scale-105 hover:shadow-primary/20">
               <Phone className="h-6 w-6" />
               Llama al 630 237 124
             </a>
-          </div>
+          </motion.div>
         </section>
       </main>
 
